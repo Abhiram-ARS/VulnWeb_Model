@@ -97,7 +97,7 @@
         <div class="logo-blue-box">acuart</div>
     </div>
 
-    <!-- VULNERABLE SEARCH BAR -->
+    <!-- VULNERABLE SEARCH BAR (XSS) -->
     <div class="search-row">
         <form action="" method="GET" style="display: flex; align-items: center; width: 100%;">
             <label>TEST and Demonstration site for</label>
@@ -155,12 +155,15 @@
                 <h1>Login to Acuart</h1>
                 <p>Please enter your username and password to continue.</p>
 
-                <!-- Error Message Box (Hidden by default) -->
                 <div id="error-box" class="error-msg">
                     Invalid credentials. Please try again.
                 </div>
 
-                <form class="login-form" id="loginForm" action="" method="GET">
+                <!-- 
+                  CHANGED TO POST: 
+                  Burp will now capture this in the Request Body (Line 18).
+                -->
+                <form class="login-form" id="loginForm" action="" method="POST">
                     <div class="form-row">
                         <label for="username">Username:</label>
                         <input type="text" id="username" name="username" value="administrator">
@@ -204,7 +207,6 @@
                     </tr>
                 </table>
 
-                <!-- Logout Button -->
                 <a href="login.html" class="logout-btn">Logout</a>
             </div>
 
@@ -242,20 +244,13 @@
             // ==========================================
             const query = urlParams.get('q');
             if (query) {
-                // Show the result box
                 document.getElementById('xss-result').style.display = 'block';
-                
-                // Simulate a vulnerable PHP backend echoing the input.
-                // We use document.write so that <script> tags execute.
                 if (query.includes('<script>') || query.includes('<img')) {
                     document.write("<h2 style='font-family:Arial; font-size:14px; margin-bottom:5px;'>Search Results for:</h2>");
                     document.write("<div style='font-family:Arial; font-size:12px;'>" + query + "</div>");
                 } else {
-                    // Safe fallback for normal words
                     document.getElementById('searchQueryDisplay').innerHTML = query;
                 }
-                
-                // Keep the search bar populated
                 document.getElementById('searchInput').value = query;
             }
 
@@ -286,20 +281,21 @@
                 document.getElementById('password').value = "";
             }
         };
-    </script>
 
-    <!-- 
-      ====================================================
-      EXACT PAYLOADS TO COPY AND PASTE INTO SEARCH BAR:
-      ====================================================
-      
-      1. <script>alert("XSS")</script>
-      
-      2. <img src=x onerror=alert("XSS")>
-      
-      3. <img src={anything} onerror=alert("XSS")>
-      
-      ====================================================
-    -->
+        // ==========================================
+        // 3. POST INTERCEPT (To make POST work without backend)
+        // ==========================================
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault(); // Stop browser from showing 404 error
+            
+            // Get whatever was typed (or injected by Burp)
+            const user = document.getElementById('username').value;
+            const pass = document.getElementById('password').value;
+            
+            // Trick the browser: push the POST data into the URL and reload.
+            // This lets our 'window.onload' script read it and show the dashboard!
+            window.location.href = window.location.pathname + "?username=" + encodeURIComponent(user) + "&password=" + encodeURIComponent(pass);
+        });
+    </script>
 </body>
 </html>
