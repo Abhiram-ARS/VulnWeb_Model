@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acuart - Login</title>
+    <style>
+        /* Global Reset */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 12px;
+            color: #000;
+            background-color: #fff;
+            padding: 10px;
+        }
+
+        a { color: #000; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        /* --- Top Header --- */
+        .header { display: flex; align-items: center; margin-bottom: 5px; }
+        .logo-red { color: #cc0000; font-size: 22px; font-weight: bold; letter-spacing: -1px; margin-right: 10px; }
+        .logo-blue-box { background-color: #e6f0f9; border: 1px solid #b3cce6; color: #0066cc; font-size: 14px; padding: 2px 8px; letter-spacing: 1px; }
+
+        /* --- Search Bar Row --- */
+        .search-row { display: flex; align-items: center; border: 1px solid #aaa; padding: 4px; margin-bottom: 2px; background-color: #fff; }
+        .search-row label { font-size: 10px; font-weight: bold; margin-right: 5px; }
+        .search-row input[type="text"] { border: 1px solid #999; padding: 2px; width: 300px; font-size: 12px; margin-right: 5px; }
+        .search-row input[type="submit"] { border: 1px solid #999; background-color: #e0e0e0; padding: 2px 6px; font-size: 11px; cursor: pointer; }
+
+        /* --- Top Navigation --- */
+        .top-nav { border: 1px solid #aaa; padding: 2px 5px; margin-bottom: 10px; font-size: 12px; }
+        .top-nav a { margin-right: 10px; }
+
+        /* --- Main Layout Area --- */
+        .main-layout { display: flex; border: 1px solid #aaa; margin-bottom: 10px; min-height: 350px; }
+
+        /* --- Left Sidebar --- */
+        .sidebar { width: 150px; background-color: #f0f0f0; border-right: 1px solid #aaa; padding-bottom: 10px; flex-shrink: 0; }
+        .sidebar-section { padding: 5px; }
+        .sidebar-section.search-box { border-bottom: 1px solid #aaa; padding-bottom: 10px; margin-bottom: 5px; }
+        .sidebar input[type="text"] { width: 100px; border: 1px solid #999; padding: 1px; margin-bottom: 3px; }
+        .sidebar input[type="submit"] { border: 1px solid #999; background-color: #e0e0e0; padding: 0px 4px; font-size: 11px; cursor: pointer; }
+        .sidebar h3 { font-size: 12px; font-weight: bold; margin-bottom: 3px; margin-top: 5px; }
+        .sidebar ul { list-style-type: none; padding-left: 0; margin-bottom: 10px; }
+        .sidebar li { margin-bottom: 2px; }
+        .sidebar a { color: #0000ee; }
+
+        /* --- Main Content Area --- */
+        .content { flex-grow: 1; padding: 5px 10px; background-color: #fff; }
+        .content h1 { font-size: 16px; font-weight: bold; margin-bottom: 10px; }
+        .content p { margin-bottom: 10px; }
+
+        /* --- XSS Result Box --- */
+        .xss-result { background-color: #fff3cd; border: 1px solid #ffeeba; padding: 10px; margin-bottom: 15px; display: none; }
+
+        /* --- Login Form Styles --- */
+        .login-form { margin-top: 10px; max-width: 400px; }
+        .form-row { display: flex; align-items: center; margin-bottom: 6px; }
+        .form-row label { width: 80px; font-size: 12px; }
+        .form-row input[type="text"], .form-row input[type="password"] { width: 200px; border: 1px solid #999; padding: 2px; font-size: 12px; }
+        .checkbox-row { margin-left: 80px; margin-bottom: 8px; display: flex; align-items: center; gap: 4px; }
+        .checkbox-row input { margin: 0; }
+        .checkbox-row label { font-size: 12px; }
+        .submit-row { margin-left: 80px; }
+        .submit-row input[type="submit"] { border: 1px solid #999; background-color: #e0e0e0; padding: 2px 10px; font-size: 12px; cursor: pointer; }
+
+        .login-note { margin-top: 15px; font-size: 12px; }
+        .login-note small { color: #555; }
+
+        /* --- Error Message Styles --- */
+        .error-msg { color: #cc0000; font-weight: bold; margin-top: 10px; margin-bottom: 10px; padding: 5px; border: 1px solid #cc0000; background-color: #ffe6e6; display: none; }
+
+        /* --- Footer Links --- */
+        .footer-nav { text-align: center; font-size: 11px; border-bottom: 1px solid #aaa; padding-bottom: 5px; margin-bottom: 5px; }
+        .footer-nav a { color: #0066cc; margin: 0 5px; }
+        .footer-nav span { color: #666; }
+
+        /* --- Warning Box --- */
+        .warning-box { background-color: #e6e6e6; border: 1px solid #ccc; padding: 8px; font-size: 11px; color: #333; line-height: 1.3; display: flex; align-items: flex-start; gap: 5px; }
+        .warning-icon { font-weight: bold; color: #cc0000; font-size: 14px; line-height: 1; }
+        
+        /* --- Success / Logged In State Styles --- */
+        .hidden { display: none !important; }
+        .success-title { color: #006600; }
+        .logout-btn { display: inline-block; margin-top: 20px; padding: 4px 15px; background-color: #e0e0e0; border: 1px solid #999; color: #000; cursor: pointer; font-size: 12px; text-decoration: none; }
+        .logout-btn:hover { background-color: #d0d0d0; text-decoration: none; }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <div class="header">
+        <div class="logo-red">acunetix</div>
+        <div class="logo-blue-box">acuart</div>
+    </div>
+
+    <!-- VULNERABLE SEARCH BAR -->
+    <div class="search-row">
+        <form action="" method="GET" style="display: flex; align-items: center; width: 100%;">
+            <label>TEST and Demonstration site for</label>
+            <input type="text" name="q" id="searchInput" value="" placeholder="Acunetix Web Vulnerability Scanner">
+            <input type="submit" value="Search">
+        </form>
+    </div>
+
+    <!-- Top Navigation -->
+    <div class="top-nav">
+        <a href="#">home</a>
+        <a href="#">categories</a>
+        <a href="#">artists</a>
+        <a href="#">disclaimer</a>
+        <a href="#">your cart</a>
+        <a href="#">guestbook</a>
+        <a href="#">AJAX Demo</a>
+    </div>
+
+    <!-- Main Layout -->
+    <div class="main-layout">
+        
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-section search-box">
+                <form action="#">
+                    <input type="text" value="search art"><br>
+                    <input type="submit" value="go">
+                </form>
+            </div>
+            <div class="sidebar-section">
+                <h3>Browse categories</h3>
+                <ul>
+                    <li><a href="#">Browse artists</a></li>
+                    <li><a href="#">Your cart</a></li>
+                    <li><a href="#">Signup</a></li>
+                    <li><a href="#">Your profile</a></li>
+                    <li><a href="#">Our guestbook</a></li>
+                    <li><a href="#">AJAX Demo</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Content Area -->
+        <div class="content">
+            
+            <!-- XSS RESULT DISPLAY -->
+            <div id="xss-result" class="xss-result">
+                <h2 style="font-size: 14px; margin-bottom: 5px;">Search Results for:</h2>
+                <div id="searchQueryDisplay"></div>
+            </div>
+
+            <!-- VIEW 1: THE LOGIN FORM -->
+            <div id="login-view">
+                <h1>Login to Acuart</h1>
+                <p>Please enter your username and password to continue.</p>
+
+                <!-- Error Message Box (Hidden by default) -->
+                <div id="error-box" class="error-msg">
+                    Invalid credentials. Please try again.
+                </div>
+
+                <form class="login-form" id="loginForm" action="" method="GET">
+                    <div class="form-row">
+                        <label for="username">Username:</label>
+                        <input type="text" id="username" name="username" value="administrator">
+                    </div>
+                    <div class="form-row">
+                        <label for="password">Password:</label>
+                        <input type="password" id="password" name="password" value="password">
+                    </div>
+                    <div class="checkbox-row">
+                        <input type="checkbox" id="remember" name="remember" value="1">
+                        <label for="remember">Remember me</label>
+                    </div>
+                    <div class="submit-row">
+                        <input type="submit" value="Log in">
+                    </div>
+                </form>
+
+                <div class="login-note">
+                    <p style="margin-bottom: 5px;"><strong>Default Credentials:</strong> Username: <code>administrator</code> | Password: <code>password</code></p>
+                    <a href="#">Register</a> if you do not have an account.<br>
+                    <small>(If you have forgotten your password, click <a href="#">here</a>.)</small>
+                </div>
+            </div>
+
+            <!-- VIEW 2: LOGGED IN -->
+            <div id="logged-in-view" class="hidden">
+                <h1 class="success-title">Welcome, Administrator!</h1>
+                <p><strong>Authentication Successful.</strong></p>
+                <p>You are now logged in as the superuser.</p>
+                
+                <table border="1" cellpadding="5" cellspacing="0" style="font-size: 12px; border-collapse: collapse; margin-top: 15px;">
+                    <tr style="background-color: #f0f0f0;">
+                        <th>ID</th>
+                        <th>Username</th>
+                        <th>Role</th>
+                    </tr>
+                    <tr>
+                        <td>1</td>
+                        <td>administrator</td>
+                        <td>Superuser</td>
+                    </tr>
+                </table>
+
+                <!-- Logout Button -->
+                <a href="login.html" class="logout-btn">Logout</a>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Footer Navigation -->
+    <div class="footer-nav">
+        <a href="#">About Us</a> . 
+        <a href="#">Privacy Policy</a> . 
+        <a href="#">Contact Us</a> . 
+        <a href="#">Shop</a> . 
+        <a href="#">HTTP Parameter Pollution</a> . 
+        <span>&copy;2010 Acunetix Ltd</span>
+    </div>
+
+    <!-- Warning Box -->
+    <div class="warning-box">
+        <div class="warning-icon">! ! !</div>
+        <div>
+            <strong>Warning:</strong> This is not a real shop. This is an example PHP application, which is intentionally vulnerable to web attacks.<br>
+            It is intended to help you test Acunetix. It also helps you understand how developer errors and bad configuration may<br>
+            affect your website's security. You can use it to test other tools and your manual hacking skills as well. Tip:<br>
+            Look for potential SQL injections, Cross-Site Scripting (XSS), and Cross-Site Request Forgery (CSRF), and more.
+        </div>
+    </div>
+
+    <!-- The Logic -->
+    <script>
+        window.onload = function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            
+            // ==========================================
+            // 1. XSS VULNERABILITY LOGIC (Search Bar)
+            // ==========================================
+            const query = urlParams.get('q');
+            if (query) {
+                // Show the result box
+                document.getElementById('xss-result').style.display = 'block';
+                
+                // Simulate a vulnerable PHP backend echoing the input.
+                // We use document.write so that <script> tags execute.
+                if (query.includes('<script>') || query.includes('<img')) {
+                    document.write("<h2 style='font-family:Arial; font-size:14px; margin-bottom:5px;'>Search Results for:</h2>");
+                    document.write("<div style='font-family:Arial; font-size:12px;'>" + query + "</div>");
+                } else {
+                    // Safe fallback for normal words
+                    document.getElementById('searchQueryDisplay').innerHTML = query;
+                }
+                
+                // Keep the search bar populated
+                document.getElementById('searchInput').value = query;
+            }
+
+            // ==========================================
+            // 2. LOGIN LOGIC (Form Handling)
+            // ==========================================
+            const username = urlParams.get('username');
+            const password = urlParams.get('password');
+            
+            if (!username) return; 
+
+            const isNormalLogin = (username === 'administrator' && password === 'password');
+            const sqliPayloads = ["'--", "' OR 1=1 --", "' OR '1'='1'--"];
+            let isInjected = false;
+            for (let p of sqliPayloads) {
+                if (username.includes(p.trim())) {
+                    isInjected = true;
+                    break;
+                }
+            }
+
+            if (isNormalLogin || isInjected) {
+                document.getElementById('login-view').classList.add('hidden');
+                document.getElementById('logged-in-view').classList.remove('hidden');
+            } else {
+                const errorBox = document.getElementById('error-box');
+                errorBox.style.display = 'block'; 
+                document.getElementById('password').value = "";
+            }
+        };
+    </script>
+
+    <!-- 
+      ====================================================
+      EXACT PAYLOADS TO COPY AND PASTE INTO SEARCH BAR:
+      ====================================================
+      
+      1. <script>alert("XSS")</script>
+      
+      2. <img src=x onerror=alert("XSS")>
+      
+      3. <img src={anything} onerror=alert("XSS")>
+      
+      ====================================================
+    -->
+</body>
+</html>
